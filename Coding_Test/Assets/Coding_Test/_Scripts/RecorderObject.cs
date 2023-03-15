@@ -14,6 +14,8 @@ public class RecorderObject
     public List<Vector3> PositionsSaved = new List<Vector3>();
     public Color OriginalColor;
     public List<Color> ColorsSaved = new List<Color>();
+
+    public bool isPlayBack = false;
     #endregion
     public RecorderObject(GameObject target, Vector3 startPos, Color originalColor, ButtonScript button)
     {
@@ -43,15 +45,20 @@ public class RecorderObject
     }
     public IEnumerator Play(float playBackInterval)
     {
-        GoOriginalState();
-
-        yield return new WaitForSeconds(playBackInterval);
-        for (int i = 0; i < PositionsSaved.Count; i++)
+        if (!isPlayBack)
         {
-            target.transform.position = PositionsSaved[i];
-            target.GetComponent<Image>().color = ColorsSaved[i];
+            GoOriginalState();
+            isPlayBack = true;
+
             yield return new WaitForSeconds(playBackInterval);
+            for (int i = 0; i < PositionsSaved.Count; i++)
+            {
+                target.transform.position = PositionsSaved[i];
+                target.GetComponent<Image>().color = ColorsSaved[i];
+                yield return new WaitForSeconds(playBackInterval);
+            }
         }
+        isPlayBack = false;
         GoOriginalState();
     }
     #endregion
