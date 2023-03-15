@@ -84,7 +84,7 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     #region Functions
     void CheckOverlap()
     {
-        foreach (GameObject button in GameObject.FindGameObjectsWithTag("ButtonSC"))
+        foreach (GameObject button in GameObject.FindGameObjectsWithTag("Button"))
         {
             if (button != gameObject && RectTransformUtility.RectangleContainsScreenPoint(button.GetComponent<RectTransform>(), Input.mousePosition))
             {
