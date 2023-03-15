@@ -86,12 +86,52 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         foreach (GameObject button in GameObject.FindGameObjectsWithTag("Button"))
         {
-            if (button != gameObject && RectTransformUtility.RectangleContainsScreenPoint(button.GetComponent<RectTransform>(), Input.mousePosition))
+            if (button != gameObject)
             {
-                Vector2 direction = (Vector2)button.transform.position - (Vector2)transform.position;
-                button.transform.position = (Vector2)button.transform.position + direction.normalized * 10f;
+                RectTransform buttonRect = button.GetComponent<RectTransform>();
+                RectTransform thisRect = GetComponent<RectTransform>();
 
-                // Check if the button is outside the screen bounds
+                Vector3[] buttonCorners = new Vector3[4];
+                buttonRect.GetWorldCorners(buttonCorners);
+
+                Vector3[] thisCorners = new Vector3[4];
+                thisRect.GetWorldCorners(thisCorners);
+
+                bool overlap = true;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    if (RectTransformUtility.RectangleContainsScreenPoint(thisRect, buttonCorners[i]))
+                    {
+                        overlap = false;
+                        break;
+                    }
+                }
+
+                if (overlap)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (RectTransformUtility.RectangleContainsScreenPoint(buttonRect, thisCorners[i]))
+                        {
+                            overlap = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (overlap)
+                {
+                    Vector2 direction = (Vector2)button.transform.position - (Vector2)transform.position;
+                    float distance = direction.magnitude;
+                    float minDistance = buttonRect.rect.width / 2f + thisRect.rect.width / 2f;
+
+                    if (distance < minDistance)
+                    {
+                        button.transform.position = (Vector2)transform.position + direction.normalized * minDistance;
+                    }
+                }
+
                 float halfWidth = button.GetComponent<RectTransform>().rect.width / 2f;
                 float halfHeight = button.GetComponent<RectTransform>().rect.height / 2f;
                 float xMin = halfWidth;

@@ -23,6 +23,12 @@ public class RecorderObject
         ButtonSC = button;
     }
     #region functions
+
+    public void RefreshPosition()
+    {
+        this.StartPos = target.transform.position;
+        this.OriginalColor = target.GetComponent<Image>().color;
+    }
     public void RecordState()
     {
         if (target != null)

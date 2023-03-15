@@ -41,23 +41,23 @@ public class Recorder : MonoBehaviour
         if (isRecording)
         {
             Record();
-            OnStop();
+            OnStopRecording();
         }
         else
         {
-            OnsSart();
+            OnsSartRecording();
         }
     }
     #endregion
 
     #region Functions
-    private void OnStop()
+    private void OnStopRecording()
     {
         indicator.color = Color.green;
         startRecordButton.SetActive(false);
         stopRecordButton.SetActive(true);
     }
-    private  void OnsSart()
+    private  void OnsSartRecording()
     {
         startRecordButton.SetActive(true);
         stopRecordButton.SetActive(false);
@@ -92,6 +92,11 @@ public class Recorder : MonoBehaviour
         if (inputField.text.Length <= 0) return;
 
         isRecording = state;
+        
+        foreach (RecorderObject recorderObject in recorderObjects.list)
+        {
+            recorderObject.RefreshPosition();
+        }
     }
     public void ClearLists()
     {
