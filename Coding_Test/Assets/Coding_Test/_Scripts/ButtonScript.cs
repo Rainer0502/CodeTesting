@@ -14,6 +14,7 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public string popups;
 
     public Color[] colors = { Color.red, Color.green, Color.blue };
+
     public bool dragging;
     private int currentIndex;
 
@@ -49,8 +50,11 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = eventData.position;
+
         popup.SetActive(false);
+        tooltip.SetActive(false);
         dragging = true;
+
         CheckOverlap();
     }
 
@@ -82,7 +86,6 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         dragging = false;
     }
-
     public void OnPointerClick(PointerEventData eventData)
     {
         if (dragging) return;
@@ -99,7 +102,6 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             tooltipText.text = tooltips;
         }
     }
-
     public void OnPointerUp(PointerEventData eventData)
     {
         if (dragging)
