@@ -7,95 +7,109 @@ using System.Linq;
 
 public class Recorder : MonoBehaviour
 {
-    public List<GameObject> TargetObjcts = new List<GameObject>();
+    #region Vars
     [SerializeField]
-    public SerializableList<RecorderObject> recorderObjects = new SerializableList<RecorderObject>();
+    private List<GameObject> targetObjects = new List<GameObject>();
+    [SerializeField]
+    private SerializableList<RecorderObject> recorderObjects = new SerializableList<RecorderObject>();
+    [SerializeField]
+    private GameObject startRecordButton;
+    [SerializeField]
+    private GameObject stopRecordButton;
 
-    public GameObject StartRecordButton;
-    public GameObject StopRecordButton;
+    [SerializeField]
+    private TextMeshProUGUI actualLoaded;
+    [SerializeField]
+    private TMP_InputField inputField;
 
-    public TextMeshProUGUI actualLoaded;
-    public Image Indicator;
+    [SerializeField]
+    private Image indicator;
 
-    public TMP_InputField inputField;
-    public float playBackInterval;
+    [SerializeField]
+    private float playBackInterval;
 
-    public bool isRecordingn = false;
-    public bool isPlayingBack = false;
+    private bool isRecording = false;
+    #endregion
 
-    public void Start()
+    #region Unity Functions
+    private void Start()
     {
         SetStartRecordingInfo();
     }
     private void Update()
     {
-        if (isRecordingn)
+        if (isRecording)
         {
             Record();
-            Indicator.color = Color.green;
-            StartRecordButton.SetActive(false);
-            StopRecordButton.SetActive(true);
+            OnStop();
         }
         else
         {
-            StartRecordButton.SetActive(true);
-            StopRecordButton.SetActive(false);
-            Indicator.color = Color.red;
+            OnsSart();
         }
     }
+    #endregion
 
+    #region Functions
+    private void OnStop()
+    {
+        indicator.color = Color.green;
+        startRecordButton.SetActive(false);
+        stopRecordButton.SetActive(true);
+    }
+    private  void OnsSart()
+    {
+        startRecordButton.SetActive(true);
+        stopRecordButton.SetActive(false);
+        indicator.color = Color.red;
+    }
     private void SetStartRecordingInfo()
     {
-        for (int i = 0; i < TargetObjcts.Count; i++)
+        foreach (GameObject targetObject in targetObjects)
         {
-            recorderObjects.list.Add(new RecorderObject(TargetObjcts[i], 
-                                                   TargetObjcts[i].transform.position, 
-                                                   TargetObjcts[i].GetComponent<Image>().color, 
-                                                   TargetObjcts[i].GetComponent<ButtonScript>()));
+            recorderObjects.list.Add(new RecorderObject(targetObject,
+                targetObject.transform.position,
+                targetObject.GetComponent<Image>().color,
+                targetObject.GetComponent<ButtonScript>()));
         }
     }
     private void Record()
     {
-        for (int i = 0; i < recorderObjects.list.Count; i++)
+        foreach (RecorderObject recorderObject in recorderObjects.list)
         {
-            recorderObjects.list[i].RecordState();
+            recorderObject.RecordState();
         }
     }
     public void SetOriginalPos()
     {
-        for (int i = 0; i < recorderObjects.list.Count; i++)
+        foreach (RecorderObject recorderObject in recorderObjects.list)
         {
-            recorderObjects.list[i].GoOriginalState();
+            recorderObject.GoOriginalState();
         }
     }
-    public void SetRecordState( bool state)
+    public void SetRecordState(bool state)
     {
         if (inputField.text.Length <= 0) return;
 
-        isRecordingn = state;
+        isRecording = state;
     }
     public void ClearLists()
     {
+        recorderObjects.list.ForEach(recorderObject =>
         {
-            for (int i = 0; i < recorderObjects.list.Count; i++)
-            {
-                recorderObjects.list[i].PositionsSaved.Clear();
-                recorderObjects.list[i].ColorsSaved.Clear();
-            }
-        }
+            recorderObject.PositionsSaved.Clear();
+            recorderObject.ColorsSaved.Clear();
+        });
     }
     public void StartPlayback()
     {
         if (inputField.text.Length <= 0) return;
 
-        isPlayingBack = true;
-        for (int i = 0; i < recorderObjects.list.Count; i++)
+        foreach (RecorderObject recorderObject in recorderObjects.list)
         {
-            StartCoroutine(recorderObjects.list[i].Play(playBackInterval));
-            Debug.Log("ddd");
+            StartCoroutine(recorderObject.Play(playBackInterval));
         }
     }
-
     public void SaveRecord()
     {
         if (inputField.text.Length <= 0) return;
@@ -112,7 +126,7 @@ public class Recorder : MonoBehaviour
 
         string json = PlayerPrefs.GetString(inputField.text);
         if (json.Length > 1)
-        recorderObjects = JsonUtility.FromJson<SerializableList<RecorderObject>>(json);
+            recorderObjects = JsonUtility.FromJson<SerializableList<RecorderObject>>(json);
         actualLoaded.text = inputField.text;
 
     }
@@ -120,4 +134,5 @@ public class Recorder : MonoBehaviour
     {
         PlayerPrefs.DeleteAll();
     }
+    #endregion
 }

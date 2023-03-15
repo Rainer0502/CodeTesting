@@ -2,22 +2,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System.Collections.Generic;
 
 public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, IPointerUpHandler
 {
-    public GameObject tooltip;
-    public TextMeshProUGUI tooltipText;
-    public string tooltips;
+    #region Vars
+    [SerializeField] private GameObject tooltip = null;
+    [SerializeField] private TextMeshProUGUI tooltipText = null;
+    [SerializeField] private string tooltips = "";
 
-    public GameObject popup;
-    public TextMeshProUGUI popupText;
-    public string popups;
+    [SerializeField] private GameObject popup = null;
+    [SerializeField] private TextMeshProUGUI popupText = null;
+    [SerializeField] private string popups = "";
 
-    public Color[] colors = { Color.red, Color.green, Color.blue };
+    [SerializeField] private Color[] colors = { Color.red, Color.green, Color.blue };
 
-    public bool dragging;
-    private int currentIndex;
+    private bool isDragging = false;
+    private int currentIndex = -1;
+    #endregion
 
+    #region UnityFunctions
     void Start()
     {
         tooltip.SetActive(false);
@@ -29,38 +33,58 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         Invoke("ShowTooltip", 0.5f);
     }
-
     public void OnPointerExit(PointerEventData eventData)
     {
         CancelInvoke();
         tooltip.SetActive(false);
     }
-
-    void ShowTooltip()
-    {
-        tooltip.SetActive(true);
-        tooltipText.text = tooltips;
-    }
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         transform.SetAsLastSibling();
     }
-
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = eventData.position;
 
         popup.SetActive(false);
         tooltip.SetActive(false);
-        dragging = true;
+        isDragging = true;
 
         CheckOverlap();
     }
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        isDragging = false;
+    }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (isDragging) return;
 
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            popup.SetActive(true);
+            popupText.text = popups;
+        }
+        else if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            currentIndex = (currentIndex + 1) % 3;
+            GetComponent<Image>().color = colors[currentIndex];
+            tooltipText.text = tooltips;
+        }
+    }
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (isDragging)
+        {
+            CheckOverlap();
+        }
+    }
+    #endregion
+
+    #region Functions
     void CheckOverlap()
     {
-        foreach (GameObject button in GameObject.FindGameObjectsWithTag("Button"))
+        foreach (GameObject button in GameObject.FindGameObjectsWithTag("ButtonSC"))
         {
             if (button != gameObject && RectTransformUtility.RectangleContainsScreenPoint(button.GetComponent<RectTransform>(), Input.mousePosition))
             {
@@ -81,32 +105,10 @@ public class ButtonScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             }
         }
     }
-
-    public void OnEndDrag(PointerEventData eventData)
+    void ShowTooltip()
     {
-        dragging = false;
+        tooltip.SetActive(true);
+        tooltipText.text = tooltips;
     }
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (dragging) return;
-
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            popup.SetActive(true);
-            popupText.text = popups;
-        }
-        else if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            currentIndex = (currentIndex + 1) % 3;
-            GetComponent<Image>().color = colors[currentIndex];
-            tooltipText.text = tooltips;
-        }
-    }
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        if (dragging)
-        {
-            CheckOverlap();
-        }
-    }
+    #endregion
 }
